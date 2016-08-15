@@ -49,14 +49,12 @@ def parse_csv(file_path, is_company, company_name):
 	order_col = None
 	province_col = None
 	weight_col = None
-	for column in reader:
-		if is_company:
+	if is_company:
+		for column in reader:
 			if not weight_col:
-				print column
 				cpname_col = column.index('快递公司名称')
 				order_col = column.index('快递单号')
 				province_col = column.index('省')
-				city_col = column.index('市')
 				weight_col = column.index('订单毛重')
 				continue
 			else:
@@ -64,35 +62,30 @@ def parse_csv(file_path, is_company, company_name):
 				cpname = column[cpname_col]
 				order = column[order_col]
 				province = column[province_col]
-				city = column[city_col]
 				weight = column[weight_col]
-		else:
-			if company_name == '韵达':
-				order = column[0]
-				province = column[1]
-				weight = column[2]
-				price = column[3]
-				cpname = company_name
-				
-			else:
-				order = column[0]
-				province = column[1]
-				weight = column[2]
-				price = column[3]
-				cpname = company_name
-		if dict.has_key(order):
-			orders.append(order)
-			count += 1
-		else:
-			if is_company:
-				dict.setdefault(order, {'province': province, 'price': price, 'weight': weight, 'cpname': cpname, 'city': city})
+			if dict.has_key(order):
+				orders.append(order)
+				count += 1
 			else:
 				dict.setdefault(order, {'province': province, 'price': price, 'weight': weight, 'cpname': cpname})
-	csvfile = file('%s 重复运单号(%s).csv' % (filename, count), 'wb')
+	else:
+		for column in reader:
+			order = column[0]
+			province = column[1]
+			weight = column[2]
+			price = column[3]
+			cpname = company_name
+			if dict.has_key(order):
+				orders.append(order)
+				count += 1
+			else:
+				dict.setdefault(order, {'province': province, 'price': price, 'weight': weight, 'cpname': cpname})
+	csvfile = file('result/%s 重复运单号(%s).csv' % (filename, count), 'wb')
 	writer = csv.writer(csvfile)
 	writer.writerow(['运单号'])
 	writer.writerows([[o] for o in orders])
 	csvfile.close()
+	
 	print '%s 数据已经加载完毕,重复数：%s' % (filename, count)
 	return dict
 
@@ -145,42 +138,43 @@ def shentong_price(province, weight):
 			return float('%.4f' % price)
 	except Exception, e:
 		exstr = traceback.format_exc()
+		
 		print exstr
 
 
 def zhongtong_price(province, weight):
 	price_dict = {
-		'浙江': (3.7, 1),  
-		'上海': (3.7, 1),  
-		'江苏': (3.7, 1),  
-		'安徽': (3.7, 1),  
-		'广东': (5.2, 0.4),
-		'山东': (5.2, 0.4),
-		'北京': (5.2, 0.4),
-		'天津': (5.2, 0.4),
-		'福建': (5.2, 0.4),
-		'江西': (5.2, 0.4),
-		'湖北': (5.2, 0.4),
-		'湖南': (5.2, 0.4),
-		'河北': (5.2, 0.4),
-		'河南': (5.2, 0.4),
-		'陕西': (5.6, 0.6),
-		'辽宁': (5.6, 0.6),
-		'云南': (5.6, 0.6),
-		'四川': (5.6, 0.6),
-		'重庆': (5.6, 0.6),
-		'山西': (5.6, 0.6),
-		'广西': (5.6, 0.6),
-		'吉林': (5.6, 0.6),
-		'贵州': (5.6, 0.6),
-		'甘肃': (8.2, 0.8),
-		'海南': (8.2, 0.8),
-		'青海': (8.2, 0.8),
-		'宁夏': (8.2, 0.8),
-		'新疆': (8.2, 0.8),
-		'西藏': (8.2, 0.8),
-		'黑龙': (5.6, 0.6),
-		'内蒙': (8.2, 0.8)
+		'浙江': (3.5, 1),
+		'上海': (3.5, 1),
+		'江苏': (3.5, 1),
+		'安徽': (3.5, 1),
+		'广东': (5.0, 4),
+		'山东': (5.0, 4),
+		'北京': (5.0, 4),
+		'天津': (5.0, 4),
+		'福建': (5.0, 4),
+		'江西': (5.0, 4),
+		'湖北': (5.0, 4),
+		'湖南': (5.0, 4),
+		'河北': (5.0, 4),
+		'河南': (5.0, 4),
+		'黑龙': (5.0, 6),
+		'陕西': (5.0, 6),
+		'辽宁': (5.0, 6),
+		'云南': (5.0, 6),
+		'四川': (5.0, 6),
+		'重庆': (5.0, 6),
+		'山西': (5.0, 6),
+		'吉林': (5.0, 6),
+		'广西': (5.0, 6),
+		'贵州': (5.0, 6),
+		'甘肃': (5.0, 8),
+		'海南': (5.0, 8),
+		'青海': (5.0, 8),
+		'宁夏': (5.0, 8),
+		'内蒙': (5.0, 8),
+		'西藏': (8.2, 8),
+		'新疆': (8.2, 8)
 	}
 	try:
 		prov_key = province[0: 6]
@@ -195,88 +189,22 @@ def zhongtong_price(province, weight):
 				extra_weight = kg(extra_weight)
 				price = price_line + extra_weight
 			else:
-				price = hectogram(weight) * extra_price
+				price = price_line + extra_weight * extra_price
 			return float('%.4f' % price)
 	except Exception, e:
 		exstr = traceback.format_exc()
+		
 		print exstr
 
 
-def yunda_price(province, city, weight):
-	price_dict = {
-		'上海': (3.5,	3.5,	4.0,	1.0),
-		'浙江': (4.0,	4.0,	4.5,	1.0),
-		'江苏': (4.0,	4.0,	4.5,	1.0),
-		'安徽': (4.0,	4.0,	4.5,	1.0),
-		'广东': (4.5,	5.5,	7.0,	3.5),
-		'山东': (4.5,	5.5,	7.0,	3.5),
-		'北京': (4.5,	5.5,	7.0,	3.5),
-		'福建': (4.5,	5.5,	7.0,	3.5),
-		'天津': (4.5,	5.5,	7.0,	3.5),
-		'湖南': (4.5,	5.5,	7.0,	3.5),
-		'河南': (4.5,	5.5,	7.0,	3.5),
-		'江西': (4.5,	5.5,	7.0,	3.5),
-		'湖北': (4.5,	5.5,	7.0,	3.5),
-		'河北': (4.5,	5.5,	7.0,	3.5),
-		'四川': (5.0,	5.5,	8.0,	5.0),
-		'重庆': (5.0,	5.5,	8.0,	5.0),
-		'山西': (5.0,	5.5,	8.0,	5.0),
-		'广西': (5.0,	5.5,	8.0,	5.0),
-		'陕西': (5.0,	5.5,	8.0,	5.0),
-		'辽宁': (5.0,	6.0,	8.5,	6.0),
-		'云南': (5.0,	6.0,	8.5,	6.0),
-		'吉林': (5.0,	6.0,	8.5,	6.0),
-		'海南': (5.0,	6.0,	8.5,	6.0),
-		'贵州': (5.0,	6.0,	8.5,	6.0),
-		'黑龙': (5.0,	6.0,	8.5,	6.0),
-		'甘肃': (7.5,	10.0,	13.5,	7.0),
-		'青海': (7.5,	10.0,	13.5,	7.0),
-		'宁夏': (7.5,	10.0,	13.5,	7.0),
-		'内蒙': (8.5,	13.0,	17.0,	8.0),
-		'新疆': (9.5,	16.0,	23.0,	14.0),
-		'西藏': (9.5,	16.0,	23.0,	14.0)
-	}
-	try:
-		extra_weight = weight - 1
-		extra_weight = kg(extra_weight)
-		if city in ['唐山市', '张家口市', '承德市']:
-			if weight <= 0.5:
-				return 5
-			elif weight <= 1:
-				return 5.5
-			elif weight <= 1.5:
-				return 8
-			else:
-				price = 8 + extra_weight * 5.0
-				return float('%.4f' % price)
-		prov_key = province[0: 6]
-		price_info = price_dict[prov_key]
-		price_line1 = price_info[0]
-		price_line2 = price_info[1]
-		price_line3 = price_info[3]
-		extra_price = price_info[3]
-		if weight <= 0.5:
-			return float('%.4f' % price_line1)
-		elif weight <= 1:
-			return float('%.4f' % price_line2)
-		elif weight <= 1.5:
-			return float('%.4f' % price_line3)
-		else:
-			price = price_line3 + extra_weight * extra_price
-			return float('%.4f' % price)
-	except Exception, e:
-		exstr = traceback.format_exc()
-		print exstr
 
-
-def calculate_price(weight, province, city, company_name, order_code):
+def calculate_price(weight, province, company_name, order_code):
 	if company_name == '中通':
 		return zhongtong_price(province, weight)
 	elif company_name == '申通':
 		return shentong_price(province, weight)
-	elif company_name == '韵达':
-		return yunda_price(province, city, weight)
 	else:
+		
 		print '未识别的快递公司'
 	return None
 
@@ -285,11 +213,11 @@ def compute(company_name, waibu_file, company_file):
 	logger('计算%s数据' % company_name)
 	waibu_dict = parse_csv(waibu_file, is_company=False, company_name=company_name)
 	transform_file_decode(company_file)
-	company_dict = parse_csv('系统混合.csv', is_company=True, company_name=company_name)
+	company_dict = parse_csv('tmp/系统混合.csv', is_company=True, company_name=company_name)
 	data = []
 	data_1 = []
 
-	workbook = xlsxwriter.Workbook('比对结果(%s).xlsx' % company_name)
+	workbook = xlsxwriter.Workbook('result/比对结果(%s).xlsx' % company_name)
 	worksheet = workbook.add_worksheet()
 
 	format_1 = workbook.add_format({'bold': True, 'font_color': 'red', 'align': 'right'})
@@ -299,13 +227,12 @@ def compute(company_name, waibu_file, company_file):
 	column_num = 1
 	worksheet.write(0, 0, u'运单号')
 	worksheet.write(0, 1, u'省份')
-	worksheet.write(0, 2, u'城市')
-	worksheet.write(0, 3, u'毛重(外)')
-	worksheet.write(0, 4, u'毛重')
-	worksheet.write(0, 5, u'毛重差(外-内)')
-	worksheet.write(0, 6, u'价格(外)')
-	worksheet.write(0, 7, u'价格')
-	worksheet.write(0, 8, u'价格差(外-内)')
+	worksheet.write(0, 2, u'毛重(外)')
+	worksheet.write(0, 3, u'毛重')
+	worksheet.write(0, 4, u'毛重差(外-内)')
+	worksheet.write(0, 5, u'价格(外)')
+	worksheet.write(0, 6, u'价格')
+	worksheet.write(0, 7, u'价格差(外-内)')
 	cp_count = 0
 	for item in company_dict.items():
 		if waibu_dict.has_key(item[0]):
@@ -314,7 +241,7 @@ def compute(company_name, waibu_file, company_file):
 			company_weight = float(item[1]['weight'])
 
 			waibu_price = float(waibu_dict[item[0]]['price'])
-			company_price = calculate_price(company_weight, waibu_dict[item[0]]['province'], item[1]['city'], company_name, item[0])
+			company_price = calculate_price(company_weight, waibu_dict[item[0]]['province'], company_name, item[0])
 
 			weight_diff = waibu_weight - company_weight
 			price_diff = float('%.4f' % (waibu_price - company_price))
@@ -328,29 +255,35 @@ def compute(company_name, waibu_file, company_file):
 					'%.3f' % weight_diff,
 					'%.2f' % waibu_price,
 					'%.2f' % company_price,
-					'%.2f' % price_diff,
-					item[1]['city']
+					'%.2f' % price_diff
 				)])
+	
 	print 'compare count=%s' % cp_count
 	data_1.sort(reverse=True)
 	for i in data_1:
-		data.append(i[1])
+		data.append(i[0])
 		worksheet.write(column_num, 0, i[1][0].decode('utf8'))
 		worksheet.write(column_num, 1, i[1][1].decode('utf8'))
-		worksheet.write(column_num, 2, i[1][8].decode('utf8'))
-		worksheet.write(column_num, 3, i[1][2].decode('utf8'), format_4)
-		worksheet.write(column_num, 4, i[1][3].decode('utf8'), format_4)
+		worksheet.write(column_num, 2, i[1][2].decode('utf8'), format_4)
+		worksheet.write(column_num, 3, i[1][3].decode('utf8'), format_4)
 		if float(i[1][4]) > 0:
-			worksheet.write(column_num, 5, i[1][4].decode('utf8'), format_1)
+			worksheet.write(column_num, 4, i[1][4].decode('utf8'), format_1)
 		elif float(i[1][4]) < 0:
-			worksheet.write(column_num, 5, i[1][4].decode('utf8'), format_2)
+			worksheet.write(column_num, 4, i[1][4].decode('utf8'), format_2)
 		else:
-			worksheet.write(column_num, 5, i[1][4].decode('utf8'), format_3)
-		worksheet.write(column_num, 6, i[1][5].decode('utf8'), format_4)
-		worksheet.write(column_num, 7, i[1][6].decode('utf8'), format_4)
-		worksheet.write(column_num, 8, i[1][7].decode('utf8'), format_1)
-
+			worksheet.write(column_num, 4, i[1][4].decode('utf8'), format_3)
+		worksheet.write(column_num, 5, i[1][5].decode('utf8'), format_4)
+		worksheet.write(column_num, 6, i[1][6].decode('utf8'), format_4)
+		worksheet.write(column_num, 7, i[1][7].decode('utf8'), format_1)
 		column_num += 1
+	worksheet.write(column_num, 0, u'总计')
+	worksheet.write(column_num, 1, '')
+	worksheet.write(column_num, 2, '')
+	worksheet.write(column_num, 3, '')
+	worksheet.write(column_num, 4, '')
+	worksheet.write(column_num, 5, '')
+	worksheet.write(column_num, 6, '')
+	worksheet.write(column_num, 7, sum(data))
 	workbook.close()
 
 	waibu_list = [item for item in waibu_dict.keys()]
@@ -366,14 +299,14 @@ def compute(company_name, waibu_file, company_file):
 	extra_nei = company_set - waibu_set
 
 	logger('检查不互有的运单')
-
+	
 	print '外部有而公司没有的运单数: %s' % len(extra_wai)
-	csvfile = file('外部有而公司没有的运单号(%s-%s).csv' % (company_name, len(extra_wai)), 'wb')
+	csvfile = file('result/外部有而公司没有的运单号(%s-%s).csv' % (company_name, len(extra_wai)), 'wb')
 	writer = csv.writer(csvfile)
 	writer.writerow(['运单号'])
 	writer.writerows([[o] for o in extra_wai])
 	print '公司有而外部没有的运单数: %s' % len(extra_nei)
-	csvfile = file('公司有而外部没有的运单号(%s-%s).csv' % (company_name, len(extra_nei)), 'wb')
+	csvfile = file('result/公司有而外部没有的运单号(%s-%s).csv' % (company_name, len(extra_nei)), 'wb')
 	writer = csv.writer(csvfile)
 	writer.writerow(['运单号'])
 	writer.writerows([[o] for o in extra_nei])
@@ -384,7 +317,7 @@ def compute(company_name, waibu_file, company_file):
 def transform_file_decode(filename):
 	try:
 		fin = open(filename, 'r')
-		fout = open('系统混合.csv', 'w')
+		fout = open('tmp/系统混合.csv', 'w')
 		out_str = ''
 		lines = fin.readlines()
 		row_num = len(lines)
@@ -399,6 +332,7 @@ def transform_file_decode(filename):
 		fin.close()
 		fout.close()
 	except Exception, e:
+		
 		print e
 
 
@@ -427,6 +361,7 @@ def logger(info):
 	for i in info.decode('utf8'):
 		str_len += get_width(ord(i))
 	left_len = 20
+	
 	print '%s%s%s' % (('-' * left_len), info, ('-' * (60 - left_len - str_len)))
 
 
