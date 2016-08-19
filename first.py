@@ -334,7 +334,7 @@ def compute(company_name, waibu_file, company_file):
 	logger('计算%s数据' % company_name)
 	waibu_dict = parse_csv(waibu_file, is_company=False, company_name=company_name)
 	transform_file_decode(company_file)
-	company_dict = parse_csv('tmp/系统混合.csv', is_company=True, company_name=company_name)
+	company_dict = parse_csv(u'tmp/系统混合.csv', is_company=True, company_name=company_name)
 	data = []
 	data_1 = []
 

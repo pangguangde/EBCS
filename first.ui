@@ -10,6 +10,15 @@
     <height>552</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="cursor">
+   <cursorShape>IBeamCursor</cursorShape>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -20,11 +29,14 @@
       <x>0</x>
       <y>0</y>
       <width>601</width>
-      <height>501</height>
+      <height>481</height>
      </rect>
     </property>
     <property name="currentIndex">
      <number>0</number>
+    </property>
+    <property name="usesScrollButtons">
+     <bool>true</bool>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -265,10 +277,10 @@
      <widget class="QTextEdit" name="logTextEdit">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>621</width>
-        <height>641</height>
+        <x>10</x>
+        <y>10</y>
+        <width>581</width>
+        <height>421</height>
        </rect>
       </property>
       <property name="styleSheet">
