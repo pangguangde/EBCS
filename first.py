@@ -37,12 +37,18 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 		self.setupUi(self)
 		self.filename = ''
 		self.label_5.setToolTip(u'    1. 文件名有命名规范\n        中通和申通外部的文件名应为 ‘外部中通/申通.csv’\n        系统内部的文件名应为 ‘系统混合.csv’\n\n    2. csv 文件的列也有要求\n        ‘外部中通/申通.csv’ 文件从左到右依次为 运单号、省份、重量、价格\n        ‘系统混合.csv’     文件从左到右依次为 运单号、省份、重量、快递公司名称')
+
 		self.zhongtongFileButton.clicked.connect(lambda: self.open_file(self.zhongtongFileText))
 		self.shentongFileButton.clicked.connect(lambda: self.open_file(self.shentongFileText))
+		self.youzhengFileButton.clicked.connect(lambda: self.open_file(self.youzhengFileText))
+
 		self.companyFileButton.clicked.connect(lambda: self.open_file(self.companyFileText))
 		self.companyFileButton_1.clicked.connect(lambda: self.open_file(self.companyFileText_1))
+		self.companyFileButton_2.clicked.connect(lambda: self.open_file(self.companyFileText_2))
+
 		self.zhongtongCheckButton.clicked.connect(lambda: self.zhongtong_check(self.zhongtongFileText.text(), self.companyFileText.text()))
 		self.shentongCheckButton.clicked.connect(lambda: self.shentong_check(self.shentongFileText.text(), self.companyFileText_1.text()))
+		self.youzhengCheckButton.clicked.connect(lambda: self.youzheng_check(self.youzhengFileText.text(), self.companyFileText_2.text()))
 		sys.stdout = EmittingStream(textWritten=self.normalOutputWritten)
 		sys.stderr = EmittingStream(textWritten=self.normalOutputWritten)
 
@@ -82,6 +88,16 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 			QtGui.QMessageBox.information(self, u'提示', u'请先选择内部混合文件')
 			return None
 		compute('申通', unicode(shentong_file), unicode(company_file))
+		QtGui.QMessageBox.information(self, u'提示', u'核对完毕!')
+
+	def youzheng_check(self, youzheng_file, company_file):
+		if (not youzheng_file) or (len(youzheng_file) == 0):
+			QtGui.QMessageBox.information(self, u'提示', u'请先选择外部邮政文件')
+			return None
+		elif (not company_file) or (len(company_file) == 0):
+			QtGui.QMessageBox.information(self, u'提示', u'请先选择内部混合文件')
+			return None
+		compute('邮政', unicode(youzheng_file), unicode(company_file))
 		QtGui.QMessageBox.information(self, u'提示', u'核对完毕!')
 
 
@@ -147,49 +163,58 @@ def parse_csv(file_path, is_company, company_name):
 
 def shentong_price(province, weight):
 	price_dict = {
-		'浙江': (4, 1),
-		'上海': (4, 1),
-		'江苏': (4, 1),
-		'安徽': (4, 1),
-		'广东': (6.3, 0.63),
-		'山东': (6.3, 0.63),
-		'北京': (6.3, 0.63),
-		'天津': (6.3, 0.63),
-		'福建': (6.3, 0.63),
-		'江西': (6.3, 0.63),
-		'湖北': (6.3, 0.63),
-		'湖南': (6.3, 0.63),
-		'河北': (6.3, 0.63),
-		'河南': (6.3, 0.63),
-		'陕西': (6.3, 0.63),
-		'辽宁': (6.3, 0.63),
-		'云南': (6.3, 0.63),
-		'四川': (6.3, 0.63),
-		'重庆': (6.3, 0.63),
-		'山西': (6.3, 0.63),
-		'广西': (6.3, 0.63),
-		'吉林': (6.3, 0.63),
-		'贵州': (6.3, 0.63),
-		'甘肃': (6.3, 0.63),
-		'海南': (6.3, 0.63),
-		'青海': (6.3, 0.63),
-		'宁夏': (6.3, 0.63),
-		'新疆': (6.3, 0.63),
-		'西藏': (6.3, 0.63),
-		'黑龙': (6.3, 0.63),
-		'内蒙': (6.3, 0.63)
+		'浙江': ((3.5, 4.0, 4.2), 1.0),
+		'上海': ((3.5, 4.0, 4.2), 1.0),
+		'江苏': ((3.5, 4.0, 4.2), 1.0),
+		'安徽': ((3.5, 4.0, 4.2), 1.0),
+
+		'江西': ((4.5, 5.5, 6.5), 3.0),
+		'福建': ((4.5, 5.5, 6.5), 3.0),
+		'山东': ((4.5, 5.5, 6.5), 3.0),
+		'广东': ((4.5, 5.5, 6.5), 3.0),
+		'北京': ((4.5, 5.5, 6.5), 3.0),
+		'天津': ((4.5, 5.5, 6.5), 3.0),
+		'河南': ((4.5, 5.5, 6.5), 3.0),
+		'湖北': ((4.5, 5.5, 6.5), 3.0),
+		'湖南': ((4.5, 5.5, 6.5), 3.0),
+		'河北': ((4.5, 5.5, 6.5), 3.0),
+		'广西': ((4.5, 5.5, 6.5), 3.0),
+		'重庆': ((4.5, 5.5, 6.5), 3.0),
+		'山西': ((4.5, 5.5, 6.5), 3.0),
+		'陕西': ((4.5, 5.5, 6.5), 3.0),
+
+		'海南': ((4.5, 5.5, 6.5), 4.0),
+		'云南': ((4.5, 5.5, 6.5), 4.0),
+		'贵州': ((4.5, 5.5, 6.5), 4.0),
+		'四川': ((4.5, 5.5, 6.5), 4.0),
+		'吉林': ((4.5, 5.5, 6.5), 4.0),
+		'辽宁': ((4.5, 5.5, 6.5), 4.0),
+		'黑龙': ((4.5, 5.5, 6.5), 4.0),
+
+		'甘肃': ((4.5, 5.5, 6.5), 8.0),
+		'内蒙': ((4.5, 5.5, 6.5), 8.0),
+		'宁夏': ((4.5, 5.5, 6.5), 8.0),
+		'青海': ((4.5, 5.5, 6.5), 8.0),
+		'新疆': ((4.5, 5.5, 6.5), 8.0),
+		'西藏': ((4.5, 5.5, 6.5), 8.0),
 	}
 	try:
 		prov_key = province[0: 6]
 		price_info = price_dict[prov_key]
-		price_line = price_info[0]
+		price_line1 = price_info[0][0]
+		price_line2 = price_info[0][1]
+		price_line3 = price_info[0][2]
 		extra_price = price_info[1]
 		if weight <= 1:
-			return float('%.4f' % price_line)
+			return float('%.4f' % price_line1)
+		elif 1 < weight <= 2:
+			return float('%.4f' % price_line2)
+		elif 2 < weight <= 3:
+			return float('%.4f' % price_line3)
 		else:
-			extra_weight = weight - 1
+			extra_weight = weight - 3
 			extra_weight = hectogram(extra_weight)
-			price = price_line + extra_weight * extra_price
+			price = price_line3 + extra_weight * extra_price
 			return float('%.4f' % price)
 	except Exception, e:
 		exstr = traceback.format_exc()
@@ -203,31 +228,36 @@ def zhongtong_price(province, weight):
 		'上海': (3.5, 1),
 		'江苏': (3.5, 1),
 		'安徽': (3.5, 1),
-		'广东': (5.0, 4),
-		'山东': (5.0, 4),
-		'北京': (5.0, 4),
-		'天津': (5.0, 4),
-		'福建': (5.0, 4),
-		'江西': (5.0, 4),
-		'湖北': (5.0, 4),
-		'湖南': (5.0, 4),
-		'河北': (5.0, 4),
-		'河南': (5.0, 4),
-		'黑龙': (5.0, 6),
-		'陕西': (5.0, 6),
-		'辽宁': (5.0, 6),
-		'云南': (5.0, 6),
-		'四川': (5.0, 6),
-		'重庆': (5.0, 6),
-		'山西': (5.0, 6),
-		'吉林': (5.0, 6),
-		'广西': (5.0, 6),
-		'贵州': (5.0, 6),
+
+		'江西': (4.5, 4),
+		'福建': (4.5, 4),
+		'山东': (4.5, 4),
+		'广东': (4.5, 4),
+		'北京': (4.5, 4),
+		'天津': (4.5, 4),
+		'河南': (4.5, 4),
+		'湖北': (4.5, 4),
+		'湖南': (4.5, 4),
+		'河北': (4.5, 4),
+		
+		'广西': (4.5, 6),
+		'重庆': (4.5, 6),
+		'山西': (4.5, 6),
+		'陕西': (4.5, 6),
+
+		'黑龙': (4.5, 6),
+		'辽宁': (4.5, 6),
+		'云南': (4.5, 6),
+		'四川': (4.5, 6),
+		'吉林': (4.5, 6),
+		'贵州': (4.5, 6),
+
 		'甘肃': (5.0, 8),
 		'海南': (5.0, 8),
 		'青海': (5.0, 8),
 		'宁夏': (5.0, 8),
 		'内蒙': (5.0, 8),
+
 		'西藏': (8.2, 8),
 		'新疆': (8.2, 8)
 	}
@@ -244,6 +274,68 @@ def zhongtong_price(province, weight):
 				extra_weight = kg(extra_weight)
 				price = price_line + extra_weight
 			else:
+				price = price_line + extra_weight * extra_price
+			return float('%.4f' % price)
+	except Exception, e:
+		exstr = traceback.format_exc()
+		QTextCodec.setCodecForCStrings(QTextCodec.codecForName("utf-8"))
+		print exstr
+
+
+def youzheng_price(province, weight):
+	price_dict = {
+		'上海': (3.6, 1),
+		'江苏': (3.6, 1),
+		'浙江': (3.6, 1),
+		'安徽': (3.6, 1),
+
+		'福建': (4.5, 0.2),
+		'江西': (4.5, 0.2),
+		'湖南': (4.5, 0.2),
+		'湖北': (4.5, 0.2),
+		'河南': (4.5, 0.2),
+		'山东': (4.5, 0.2),
+
+		'河北': (4.8, 0.3),
+		'天津': (4.8, 0.3),
+		'广东': (4.8, 0.3),
+		'北京': (4.8, 0.3),
+
+		'陕西': (4.8, 0.4),
+		'山西': (4.8, 0.4),
+		'贵州': (4.8, 0.4),
+		'重庆': (4.8, 0.4),
+		'辽宁': (4.8, 0.4),
+		'甘肃': (4.8, 0.4),
+		'海南': (4.8, 0.4),
+		'四川': (4.8, 0.4),
+		'宁夏': (4.8, 0.4),
+		'内蒙': (4.8, 0.4),
+		'广西': (4.8, 0.4),
+
+		'黑龙': (6.5, 0.6),
+		'云南': (6.5, 0.6),
+		'吉林': (6.5, 0.6),
+
+		'青海': (14, 1),
+		'新疆': (14, 1),
+		'西藏': (14, 1)
+	}
+	try:
+		prov_key = province[0: 6]
+		price_info = price_dict[prov_key]
+		price_line = price_info[0]
+		extra_price = price_info[1]
+
+		if weight < 1:
+			return float('%.4f' % price_line)
+		else:
+			extra_weight = weight - 1
+			if prov_key in ['浙江', '江苏', '上海', '安徽']:
+				extra_weight = kg(extra_weight)
+				price = price_line + extra_weight
+			else:
+				extra_weight = hectogram(extra_weight)
 				price = price_line + extra_weight * extra_price
 			return float('%.4f' % price)
 	except Exception, e:
@@ -323,7 +415,9 @@ def calculate_price(weight, province, company_name, order_code):
 	if company_name == '中通':
 		return zhongtong_price(province, weight)
 	elif company_name == '申通':
-		return shentong_price(province, weight)
+		return shentong_price(province, weight)	
+	elif company_name == '邮政':
+		return youzheng_price(province, weight)
 	else:
 		QTextCodec.setCodecForCStrings(QTextCodec.codecForName("utf-8"))
 		print '未识别的快递公司'
@@ -358,7 +452,10 @@ def compute(company_name, waibu_file, company_file):
 	for item in company_dict.items():
 		if waibu_dict.has_key(item[0]):
 			cp_count += 1
-			waibu_weight = float(waibu_dict[item[0]]['weight'])
+			if company_name == '邮政':
+				waibu_weight = float(waibu_dict[item[0]]['weight']) / 1000.0
+			else:
+				waibu_weight = float(waibu_dict[item[0]]['weight'])				
 			company_weight = float(item[1]['weight'])
 
 			waibu_price = float(waibu_dict[item[0]]['price'])
